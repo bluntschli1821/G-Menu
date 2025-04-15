@@ -4,47 +4,51 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-
     [SerializeField]
-    public float movementF = 10f;
-    public float jumpF = 11f;
+    float movementF = 10f,
+        jumpF = 11f,
+        minX,
+        maxX;
 
-    private float moveX;
+    // This is not serialized hence even being a floating point number I have kept it on it's own
+    float moveX;
 
-    private Rigidbody2D myBody;
+    Transform player;
+    Vector3 tempPos;
 
-    private SpriteRenderer sr;
+    Rigidbody2D myBody;
 
-    private Animator anim;
-    private string walkAnimation = "Walk";
+    SpriteRenderer sr;
 
-    private bool isGrounded = true;
-    private string Ground_Tag = "Ground";
+    Animator anim;
+    string walkAnimation = "Walk";
 
-    /* Awake is called when the script instance is being loaded
-     private void awake()
-     {
+    bool isGrounded = true;
+    string Ground_Tag = "Ground";
 
-        float v = Input.GetAxis("Vertical"); // Get vertical input (W/S or Up/Down arrows)
-        float h = Input.GetAxis("Horizontal"); // Get horizontal input (A/D or Left/Right arrows)
-
-        Vector2 pos = transform.position; // Get the current position of the player
-
-         pos.x += h * movementF * Time.deltaTime; // Update the x position based on horizontal input
-         pos.y += v * movementF * Time.deltaTime; // Update the y position based on vertical input
-
-        transform.position = pos; // Set the new position of the player
-
-     }*/
-
-    // Start is called before the first frame update
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // Awake is called when the script instance is being loaded
+    void Awake()
     {
         myBody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        sr = GetComponent<SpriteRenderer>();
 
+        sr = GetComponent<SpriteRenderer>();
+        /*   float v = Input.GetAxis("Vertical"); // Get vertical input (W/S or Up/Down arrows)
+           float h = Input.GetAxis("Horizontal"); // Get horizontal input (A/D or Left/Right arrows)
+   
+           Vector2 pos = transform.position; // Get the current position of the player
+   
+            pos.x += h * movementF * Time.deltaTime; // Update the x position based on horizontal input
+            pos.y += v * movementF * Time.deltaTime; // Update the y position based on vertical input
+   
+           transform.position = pos; // Set the new position of the player
+        */
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        player = GameObject.FindWithTag("Player").transform;
     }
 
     // Update is called once per frame
@@ -54,7 +58,25 @@ public class Player : MonoBehaviour
         AnimatePlayer();
         PlayerJump();
 
+        // Setting player limitations with regards to movement in scene
+        tempPos = transform.position;
+        tempPos.x = player.position.x;
+
+        if (tempPos.x < minX)
+            tempPos.x = minX;
+
+        if (tempPos.x > maxX)
+            tempPos.x = maxX;
+
+        transform.position = tempPos;
     }
+
+    // This delays the jump time of the in-game player
+    /* void FixedUpdate()
+     {
+         PlayerJump();
+     }
+    */
 
     void PlayerMoveKeyboard()
     {
@@ -70,7 +92,7 @@ public class Player : MonoBehaviour
         {
             anim.SetBool(walkAnimation, true);
             sr.flipX = false;
-        }  // Movong Backwards
+        } // Movong Backwards
         else if (moveX < 0)
         {
             anim.SetBool(walkAnimation, true);
@@ -91,9 +113,10 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag(Ground_Tag)){
+        if (collision.gameObject.CompareTag(Ground_Tag))
+        {
             isGrounded = true;
         }
     }
