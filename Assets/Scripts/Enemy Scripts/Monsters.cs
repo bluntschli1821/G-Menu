@@ -5,19 +5,23 @@ using UnityEngine;
 public class Monsters : MonoBehaviour
 {
     [HideInInspector]
-    float speed;
+    public float speed;
 
     Rigidbody2D myBody;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    void Awake()
+    void Awake() //Function
     {
         myBody = GetComponent<Rigidbody2D>();
     }
 
-    void Start() { }
+    void Start() //Function
+    { }
 
     // Update is called once per frame
-    void Update() { }
-}
+    void FixedUpdate() //Function
+    {
+        myBody.linearVelocity = new Vector2(speed, myBody.linearVelocity.y);
+    }
+} //Class

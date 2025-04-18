@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Analytics;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -13,18 +15,27 @@ public class Player : MonoBehaviour
     // This is not serialized hence even being a floating point number I have kept it on it's own
     float moveX;
 
+    //  This is used when limiting the player from leaving the scene
     Transform player;
     Vector3 tempPos;
 
+    // This is a Rigidbody2D component as the name implies
     Rigidbody2D myBody;
 
+    // This is a SpriteRenderer component as the name implies
     SpriteRenderer sr;
 
+    // This is an Animator component ...........
     Animator anim;
+
+    /* In the walk animation component,
+    the walkAnimation string is set to the Walk.anim set earlier in unity engine. */
     string walkAnimation = "Walk";
 
+    // This boolean is used to check if the player object is grounded before granting another jump instruction
     bool isGrounded = true;
     string Ground_Tag = "Ground";
+    private string Enemy_Tag = "Enemies";
 
     // Awake is called when the script instance is being loaded
     void Awake()
@@ -33,16 +44,6 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
 
         sr = GetComponent<SpriteRenderer>();
-        /*   float v = Input.GetAxis("Vertical"); // Get vertical input (W/S or Up/Down arrows)
-           float h = Input.GetAxis("Horizontal"); // Get horizontal input (A/D or Left/Right arrows)
-   
-           Vector2 pos = transform.position; // Get the current position of the player
-   
-            pos.x += h * movementF * Time.deltaTime; // Update the x position based on horizontal input
-            pos.y += v * movementF * Time.deltaTime; // Update the y position based on vertical input
-   
-           transform.position = pos; // Set the new position of the player
-        */
     }
 
     // Start is called before the first frame update
@@ -71,8 +72,9 @@ public class Player : MonoBehaviour
         transform.position = tempPos;
     }
 
+    /*
     // This delays the jump time of the in-game player
-    /* void FixedUpdate()
+    void FixedUpdate()
      {
          PlayerJump();
      }
@@ -87,18 +89,17 @@ public class Player : MonoBehaviour
 
     void AnimatePlayer()
     {
-        //    Moving Forward
-        if (moveX > 0)
+        if (moveX > 0) // Moving Forward
         {
             anim.SetBool(walkAnimation, true);
             sr.flipX = false;
-        } // Movong Backwards
-        else if (moveX < 0)
+        }
+        else if (moveX < 0) // Movong Backwards
         {
             anim.SetBool(walkAnimation, true);
             sr.flipX = true;
-        } // Standing Idle
-        else
+        }
+        else // Standing Idle
         {
             anim.SetBool(walkAnimation, false);
         }
@@ -115,9 +116,24 @@ public class Player : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        /* If statements containing has no need for the curly braces,
+        when there a multiple lines of code that want to be nested in
+        the if statement then the curly braces are used */
+
+        if (!player)
+            return;
+
         if (collision.gameObject.CompareTag(Ground_Tag))
-        {
             isGrounded = true;
-        }
+
+        if (collision.gameObject.CompareTag(Enemy_Tag))
+            Destroy(gameObject);
     }
-}
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        // The Collider2D has a CompareTag property as opposed the Collision2d that has a pseudo "." property
+        if (collision.CompareTag(Enemy_Tag))
+            Destroy(gameObject);
+    }
+} // Class
